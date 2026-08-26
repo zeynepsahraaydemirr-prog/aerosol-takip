@@ -290,16 +290,9 @@ with tab2:
     df = pd.read_sql_query("SELECT * FROM maintenance_logs", conn)
     
     if not df.empty:
-        g1, g2 = st.columns(2, gap="medium")
-        with g1:
-            st.subheader("İstasyon / Makine Bazında Duruş (Dk)")
-            station_loss = df.groupby("station")["duration_min"].sum().reset_index()
-            st.bar_chart(station_loss.set_index("station"), color="#000000")
-            
-        with g2:
-            st.subheader("Müdahale Yöntemi Dağılımı (Dk)")
-            method_loss = df.groupby("intervention_type")["duration_min"].sum().reset_index()
-            st.bar_chart(method_loss.set_index("intervention_type"), color="#475569")
+        st.subheader("📊 İstasyon / Makine Bazında Toplam Duruş (Dk)")
+        station_loss = df.groupby("station")["duration_min"].sum().reset_index()
+        st.bar_chart(station_loss.set_index("station"), color="#000000")
             
         st.divider()
         st.subheader("🚨 Tekrarlayan Hatalar (Kronik Duruşlar)")
