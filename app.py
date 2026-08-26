@@ -5,9 +5,6 @@ import os
 import io
 from datetime import datetime
 
-# --- SİSTEM GİRİŞ ŞİFRESİ ---
-DOGRU_SIFRE = "1927"
-
 # --- SAYFA YAPILANDIRMASI ---
 st.set_page_config(
     page_title="Aerosol TPM & Arıza Takip",
@@ -87,33 +84,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# --- ŞİFRE KONTROL MEKANİZMASI ---
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-
-def check_password():
-    if st.session_state.password_input == DOGRU_SIFRE:
-        st.session_state.authenticated = True
-    else:
-        st.session_state.authenticated = False
-        st.error("Hatalı PIN Kodu! Lütfen tekrar deneyiniz.")
-
-if not st.session_state.authenticated:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    col_lock1, col_lock2, col_lock3 = st.columns([1, 1.5, 1])
-    with col_lock2:
-        st.title("🔒 Giriş Doğrulama")
-        st.caption("Aerosol TPM & Arıza Portalı Güvenli Erişim")
-        st.text_input(
-            "Erişim PIN Kodunu Giriniz:",
-            type="password",
-            key="password_input",
-            placeholder="PIN Kodunu yazıp Enter'a basınız",
-            on_change=check_password
-        )
-        st.button("Giriş Yap", on_click=check_password, use_container_width=True)
-    st.stop()
 
 # --- VERİTABANI BAĞLANTISI ---
 conn = sqlite3.connect("aerosol_db.db", check_same_thread=False)
@@ -197,11 +167,6 @@ with st.sidebar:
             except:
                 pass
         st.success("Veritabanı sıfırlandı!")
-        st.rerun()
-        
-    st.divider()
-    if st.button("🚪 Çıkış Yap", use_container_width=True):
-        st.session_state.authenticated = False
         st.rerun()
 
 # --- ÜST BAŞLIK ALANI ---
@@ -327,14 +292,14 @@ with tab2:
     if not df.empty:
         g1, g2 = st.columns(2, gap="medium")
         with g1:
-            st.subheader("İstasyon Bazında Toplam Duruş (Dk)")
+            st.subheader("İstasyon / Makine Bazında Duruş (Dk)")
             station_loss = df.groupby("station")["duration_min"].sum().reset_index()
             st.bar_chart(station_loss.set_index("station"), color="#000000")
             
         with g2:
-            st.subheader("Hat Bazında Toplam Duruş (Dk)")
-            line_loss = df.groupby("line_name")["duration_min"].sum().reset_index()
-            st.bar_chart(line_loss.set_index("line_name"), color="#475569")
+            st.subheader("Müdahale Yöntemi Dağılımı (Dk)")
+            method_loss = df.groupby("intervention_type")["duration_min"].sum().reset_index()
+            st.bar_chart(method_loss.set_index("intervention_type"), color="#475569")
             
         st.divider()
         st.subheader("🚨 Tekrarlayan Hatalar (Kronik Duruşlar)")
